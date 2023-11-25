@@ -22,8 +22,6 @@ from scipy.stats import entropy
 
 # # 特徵處理
 
-# In[ ]:
-
 
 old_train = pd.read_csv('dataset_1st/training.csv')
 new_train = pd.read_csv('dataset_2nd/public.csv')
@@ -37,9 +35,7 @@ df = pd.concat([old_train, new_train, new_val],sort=False)
 
 pd.set_option('display.max_columns',500)
 
-
-# In[ ]:
-
+df_copy = df.copy()
 
 # Step 1 計算交易活動，計算每張卡的靜態交易次數以及這些次數在該客戶所有交易中的比例
 sbctn = df_copy.groupby(by=['chid', 'cano'])['txkey'].count().rename('same_chid_different_cano_trade_number').reset_index()
