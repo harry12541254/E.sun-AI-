@@ -1,7 +1,8 @@
-Pandas: 2.0.3
-NumPy version: 1.25.2
-Scikit-learn version: 1.3.0
-Collections module is a built-in module, no version available.
-Datetime module is a built-in module, no version available.
-CatBoost version: 1.2.2
-SciPy version: 1.11.2
+Python Version: 3.10.10 | packaged by Anaconda, Inc. | (main, Mar 21 2023, 18:39:17) [MSC v.1916 64 bit (AMD64)]
+Pandas Version: 2.0.3
+NumPy Version: 1.25.2
+Matplotlib Version: 3.7.2
+Dask Version: 2023.11.0
+Scikit-Learn Version: 1.3.0
+CatBoost Version: 1.2.2
+SciPy Version: 1.11.2
