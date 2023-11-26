@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[ ]:
 
 
 """
@@ -15,9 +15,6 @@ output：特徵處理完的training dataset(processed_data.parquet)、validation
 
 
 """
-
-
-# In[2]:
 
 
 import pandas as pd
@@ -34,33 +31,8 @@ from catboost import CatBoostClassifier, Pool, EShapCalcType, EFeaturesSelection
 from scipy.stats import entropy
 
 
-# In[3]:
-
-
-import sys
-import dask
-import sklearn
-import catboost
-import scipy
-
-packages_versions = {
-    "Python Version": sys.version,
-    "Pandas Version": pd.__version__,
-    "NumPy Version": np.__version__,
-    "Dask Version": dask.__version__,
-    "Scikit-Learn Version": sklearn.__version__,
-    "CatBoost Version": catboost.__version__,
-    "SciPy Version": scipy.__version__
-}
-
-# 打印套件及其版本
-for package, version in packages_versions.items():
-    print(f"{package}: {version}")
-
 
 # # 特徵處理
-
-# In[4]:
 
 
 # 載入資料 
@@ -74,9 +46,6 @@ example = pd.read_csv('dataset_1st/31_範例繳交檔案.csv')
 
 df = pd.concat([old_train, new_train, new_val],sort=False)
 df_copy = df.copy()
-
-
-# In[5]:
 
 
 # Step 1 計算交易活動，計算特定卡在前30天消費所佔的次數比率與之後的比率，計算之間的變化率
@@ -123,9 +92,6 @@ df_copy = df_copy.merge(card_ratio_after_30[['chid', 'cano', 'card_transaction_r
 df_copy = df_copy.merge(card_ratio_change[['chid', 'cano', 'ratio_change']], on=['chid', 'cano'], how='left')
 
 
-# In[6]:
-
-
 # Step 2 計算每個卡號每天的交易頻率並進行正規化處理
 
 transactions_per_day = df_copy.groupby(['cano', 'locdt']).size().reset_index(name='daily_transactions')
@@ -143,10 +109,6 @@ df_copy['normalized_trans_freq'] = df_copy.apply(lambda x: (x['daily_transaction
 
 # fill na
 df_copy['normalized_trans_freq'] = df_copy['normalized_trans_freq'].fillna(-1)
-
-
-
-# In[7]:
 
 
 # Step 3 計算每個卡號每天的交易金額並進行正規化處理
@@ -167,9 +129,6 @@ daily_amount_sum['normalized_daily_amount'] = daily_amount_sum.apply(
     axis=1)
 
 df_copy = df_copy.merge(daily_amount_sum[['cano', 'locdt', 'normalized_daily_amount']], on=['cano', 'locdt'], how='left')
-
-
-# In[8]:
 
 
 # Step 4 計算上次刷卡時間(秒數)
@@ -207,9 +166,6 @@ df_copy = df_copy.merge(sorted_df[['txkey', 'difference_seconds']], on='txkey', 
 df_copy.head()
 
 
-# In[9]:
-
-
 # Step 5 計算每個卡號刷卡的每筆之間的時間間隔的平均和標準差
 
 def calculate_transaction_intervals(group):
@@ -244,63 +200,70 @@ intervals_df.columns = ['cano', 'avg_interval', 'std_interval']
 df_copy = df_copy.merge(intervals_df, on='cano', how='left')
 
 
-# In[12]:
-
 
 # Step 6 每張卡號在不同商品類別（mcc）下的交易情況
 
-# 一次計算所有統計數據
-grouped = df_copy.groupby(['cano', 'mcc'])
+# 計算每張卡號在不同商品類別下的交易數量
+df_copy['transactions_per_mcc'] = df_copy.groupby(['cano', 'mcc'])['txkey'].transform('count')
 
-# 創建一個新的數據框來存儲結果
-stats = pd.DataFrame({
-    'transactions_per_mcc': grouped['txkey'].count(),
-    'mcc_total_amount': grouped['conam'].sum(),
-    'variance_transaction_amount_per_mcc': grouped['conam'].var()
-})
+# 計算每個卡號每種商品類別的總交易金額
+df_copy['mcc_total_amount'] = df_copy.groupby(['cano', 'mcc'])['conam'].transform('sum')
 
-# 計算MAD
-def mad(series):
-    return (series - series.median()).abs().median()
+# 計算每個卡號在不同商品類別下的交易金額的變異數
+df_copy['variance_transaction_amount_per_mcc'] = df_copy.groupby(['cano', 'mcc'])['conam'].transform('var')
 
-stats['mad_transaction_amount_per_mcc'] = grouped['conam'].apply(mad)
+# 計算每個卡號在不同商品類別下的交易金額的MAD
+def mad(x):
+    return (x - x.median()).abs().median()
 
-# 重置索引以便後續合併
-stats.reset_index(inplace=True)
+df_copy['mad_transaction_amount_per_mcc'] = df_copy.groupby(['cano', 'mcc'])['conam'].transform(mad)
 
-# 合併計算結果回原始數據框
-df_copy = df_copy.merge(stats, on=['cano', 'mcc'], how='left')
-
-
-# In[13]:
 
 
 # Step 7: 分析每張卡號在不同 mchno下的交易情況
 
-# 一次計算所有統計數據
-grouped = df_copy.groupby(['cano', 'mchno'])
+# 計算每張卡號在不同商戶編碼下的交易數量
+df_copy['transactions_per_mchno'] = df_copy.groupby(['cano', 'mchno'])['txkey'].transform('count')
 
-# 創建一個新的數據框來存儲結果
-stats = pd.DataFrame({
-    'transactions_per_mchno': grouped['txkey'].count(),
-    'mchno_total_amount': grouped['conam'].sum(),
-    'variance_transaction_amount_per_mchno': grouped['conam'].var()
-})
+# 計算每個卡號每個商戶編碼的總交易金額
+df_copy['mchno_total_amount'] = df_copy.groupby(['cano', 'mchno'])['conam'].transform('sum')
 
-# 計算MAD
-stats['mad_transaction_amount_per_mchno'] = grouped['conam'].apply(mad)
+# 計算每個卡號在不同商戶編碼下的交易金額的變異數
+df_copy['variance_transaction_amount_per_mchno'] = df_copy.groupby(['cano', 'mchno'])['conam'].transform('var')
 
-# 重置索引以便後續合併
-stats.reset_index(inplace=True)
-
-# 合併計算結果回原始數據框
-df_copy = df_copy.merge(stats, on=['cano', 'mchno'], how='left')
+# 使用之前定義的mad函數計算每個卡號在不同商戶編碼下的交易金額的MAD
+df_copy['mad_transaction_amount_per_mchno'] = df_copy.groupby(['cano', 'mchno'])['conam'].transform(mad)
 
 
-# In[14]:
+
+# Step 8 觀察交易註記變化
+
+df_copy = df_copy.sort_values(by=['cano', 'locdt', 'loctm'])
+
+# initialize 
+df_copy['hcefg_change'] = 0  
+df_copy['unusual_3dsmk'] = 0  
+
+# 判斷上次交易
+previous_hcefg = df_copy.groupby('cano')['hcefg'].shift()
+previous_3dsmk = df_copy.groupby('cano')['flg_3dsmk'].shift()
+
+# 判斷卡號是否相同
+df_copy['same_cano'] = df_copy['cano'] == df_copy['cano'].shift()
+
+# 若支付型態改變則標註為 1
+df_copy.loc[df_copy['same_cano'], 'hcefg_change'] = (df_copy['hcefg'] != previous_hcefg).astype(int)
+
+# 若3D安全驗證改變則標註為 1
+df_copy.loc[df_copy['same_cano'], 'unusual_3dsmk'] = ((previous_3dsmk == 0) & (df_copy['flg_3dsmk'] == 1)).astype(int)
+
+df_copy.drop(columns=['same_cano'], inplace=True)
+
+df_copy[['cano', 'locdt', 'loctm', 'hcefg', 'hcefg_change', 'flg_3dsmk', 'unusual_3dsmk']].head()
 
 
-# Step 8 觀察交易地點變化
+
+# Step 9 觀察交易地點變化
 
 df_copy = df_copy.sort_values(by=['cano', 'locdt'])
 
@@ -322,10 +285,8 @@ df_copy['country_change'] = ((df_copy['stocn'] != previous_locations['stocn']) &
 df_copy.drop(columns=['same_cano'], inplace=True)
 
 
-# In[15]:
 
-
-# Step 9 把loctom拆成鐘點 
+# Step 10 把loctom拆成鐘點 
 
 def time_to_seconds(t):
     return t.hour * 3600 + t.minute * 60 + t.second
@@ -341,31 +302,16 @@ df_copy['loctm_seconds'] = df_copy['loctm'].apply(time_to_seconds)
 df_copy['loctm'] = df_copy['loctm'].apply(time_to_string)
 
 
-# In[20]:
-
-
-df_copy
-
-
-# #  合併要訓練的資料
-
-# In[ ]:
+# #合併要訓練的資料
 
 
 train_data = pd.concat([old_train,new_train],sort=False)
 new_train_data = df_copy.merge(train_data[['txkey']], on='txkey', how='inner')
 new_val_data = df_copy.merge(example[['txkey']], on='txkey', how='inner')
 
-
-# In[ ]:
-
+del old_train
+del train_data
 
 new_train_data.to_parquet('processed_data.parquet')
 new_val_data.to_parquet('val_data.parquet')
-
-
-# In[ ]:
-
-
-
 
