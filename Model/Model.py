@@ -9,7 +9,7 @@
 
 input：特徵處理完的training dataset(processed_data.parquet)、validation dataset(val_data.parquet)
 
-output：最終final_prediction 
+output：最終final_prediction、訓練後model模型檔案model.cbm
 
 
 """
