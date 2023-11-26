@@ -33,16 +33,9 @@ loaded_model = CatBoostClassifier()
 loaded_model.load_model(model_path, format='cbm')
 
 
-# In[3]:
-
-
 new_val_data = pd.read_parquet('val_data.parquet')
 example = pd.read_csv('dataset_1st/31_範例繳交檔案.csv')
 new_val_data = new_val_data.set_index('txkey')
-
-
-# In[4]:
-
 
 columns_to_drop = ['chid', 'cano', 'bnsfg', 'flbmk', 'ovrlt', 'iterm']
 
@@ -56,10 +49,6 @@ for feature in cat_features:
     
 test_pool = Pool(X, cat_features=cat_features)
 
-
-# In[5]:
-
-
 y_pred = loaded_model.predict(test_pool).astype(int)
 new_val_data['pred']= y_pred
 new_val_data =new_val_data.reset_index()
@@ -70,27 +59,10 @@ example = example.drop_duplicates(subset='txkey')
 df2_sorted = example[['txkey']].merge(output_df, on='txkey', how='left')
 df2_sorted = df2_sorted.set_index('txkey')
 
-
-# In[6]:
-
-
 output_filename = 'dataset_2nd/predictions_secondround.csv'
 df2_sorted.to_csv(output_filename, index='True')
 
 
-# In[7]:
-
-
-df2_sorted.value_counts()
-
-
-# In[11]:
-
-
-df2_sorted.value_counts()
-
-
-# In[ ]:
 
 
 
