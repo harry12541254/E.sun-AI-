@@ -1,4 +1,6 @@
-Python Version: 3.10.10 | packaged by Anaconda, Inc. | (main, Mar 21 2023, 18:39:17) [MSC v.1916 64 bit (AMD64)]
+Python Version: 3.10.10 
+
+套件：
 Pandas Version: 2.0.3
 NumPy Version: 1.26.0
 Matplotlib Version: 3.7.2
