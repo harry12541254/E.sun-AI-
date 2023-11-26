@@ -11,7 +11,7 @@
 的提升梯度算法模型，並且在區分訓練和驗證資料時，採分層抽樣以利模型能夠平衡詐欺資料。Boosting演算法在處理非線型模型有非常優秀的表現，
 且Catboost更是針對類別變數有良好的處理方法，搭配上強大的運算效能，讓Catboost能有不錯的預測結果。
 
-最後main.py則是合併前述兩者檔案，匯入訓練好的model資料夾訓練好的model.cbm和 preprocess資料夾特徵工程處理完的val_data，
+最後main.py則是合併前述兩者檔案，匯入model資料夾內訓練好的model.cbm和 preprocess資料夾特徵工程後的val_data，
 執行後即可匯出預測檔案
 
 註：因原始為使用google colab進行運算，雖有轉檔成.py，但為避免錯誤仍提供.ipynb檔案提供審查。
