@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[ ]:
 
 
 """
@@ -9,13 +9,10 @@
 
 input：特徵處理完的training dataset(processed_data.parquet)、validation dataset(val_data.parquet)
 
-output：最終final_prediction、訓練後model模型檔案model.cbm
+output：最終final_prediction 
 
 
 """
-
-
-# In[2]:
 
 
 import pandas as pd
@@ -34,7 +31,7 @@ from scipy.stats import entropy
 
 # # 訓練模型
 
-# In[5]:
+# In[ ]:
 
 
 new_train_data = pd.read_parquet('processed_data.parquet')
@@ -42,22 +39,22 @@ new_val_data = pd.read_parquet('val_data.parquet')
 example = pd.read_csv('dataset_1st/31_範例繳交檔案.csv')
 
 
-# In[6]:
 
 
-cat_features = ['contp', 'etymd', 'mcc', 'ecfg', 'stocn', 'scity', 'insfg', 'mchno', 'acqic',
-                'stscd', 'hcefg', 'csmcu', 'flg_3dsmk', 'hour','city_change', 'country_change']
 
 columns_to_drop = ['label', 'txkey', 'chid', 'cano', 'bnsfg', 'flbmk', 'ovrlt', 'iterm']
 
-# 從數據框中刪除指定的列
+cat_features = ['contp', 'etymd', 'mcc', 'ecfg', 'stocn', 'scity', 'insfg', 'mchno', 'acqic',
+                'stscd', 'hcefg', 'csmcu', 'flg_3dsmk', 'hour','city_change', 'country_change', 'unusual_3dsmk']
+
 X = new_train_data.drop(columns=columns_to_drop)
 y = new_train_data['label']
 
 
-# In[7]:
+# In[ ]:
 
 
+X = new_train_data.drop(columns=columns_to_drop)
 for feature in cat_features:
     X[feature] = X[feature].astype(str)
     
@@ -72,7 +69,7 @@ train_pool = Pool(X_train, y_train,cat_features=cat_features)
 test_pool = Pool(X_test, y_test,cat_features=cat_features)
 
 
-# In[23]:
+# In[ ]:
 
 
 """
@@ -80,12 +77,12 @@ test_pool = Pool(X_test, y_test,cat_features=cat_features)
 
 """
 catboost_model = CatBoostClassifier(
-    iterations=5000,  
-    learning_rate=0.0325,
+    iterations=6000,  
+    learning_rate=0.035,
     depth=7,
     loss_function='Logloss',
     eval_metric='F1',  
-    early_stopping_rounds=800,
+    early_stopping_rounds=500,
     random_seed=42,
     verbose=100,
     l2_leaf_reg=3,
@@ -94,7 +91,7 @@ catboost_model = CatBoostClassifier(
 #     subsample=0.85,
     max_ctr_complexity=10,
     task_type='GPU',
-    scale_pos_weight = 9.484, # 9.45
+    scale_pos_weight =  9.483525,
     random_strength=3,
     grow_policy='Lossguide'
 )
@@ -106,7 +103,7 @@ catboost_model.fit(
 )
 
 
-# In[24]:
+# In[ ]:
 
 
 y_pred = catboost_model.predict(test_pool)
@@ -116,33 +113,26 @@ precision = precision_score(y_test, y_pred, average='binary', pos_label=1)
 print(f"Precision: {precision}")
 
 
-# In[25]:
-
-
 recall = recall_score(y_test, y_pred, average='binary', pos_label=1)
 
 print(f"Recall: {recall}")
 
 
 
-# In[27]:
-
-
 # 查看特徵
 
-feature_names =['locdt', 'loctm', 'contp', 'etymd', 'mchno', 'acqic', 'mcc', 
-                'conam', 'ecfg', 'insfg', 'flam1', 'stocn', 'scity', 'stscd', 
-                'hcefg', 'csmcu', 'csmam', 'flg_3dsmk', 'card_transaction_count', 
-                'customer_total_transactions', 'card_transaction_ratio_before_30', 
-                'card_transaction_ratio_after_30', 'ratio_change', 'min_daily_trans', 
-                'max_daily_trans', 'daily_transactions', 'normalized_trans_freq', 
-                'normalized_daily_amount', 'difference_seconds', 'avg_interval', 
-                'std_interval', 'transactions_per_mcc_x', 'mcc_total_amount_x', 
-                'variance_transaction_amount_per_mcc_x', 'transactions_per_mcc_y', 
-                'mcc_total_amount_y', 'variance_transaction_amount_per_mcc_y', 
-                'mad_transaction_amount_per_mcc', 'transactions_per_mchno', 'mchno_total_amount', 
-                'variance_transaction_amount_per_mchno', 'mad_transaction_amount_per_mchno', 
-                'city_change', 'country_change', 'hour', 'loctm_seconds']
+feature_names =['locdt', 'loctm', 'contp', 'etymd', 'mchno', 
+                'acqic', 'mcc', 'conam', 'ecfg', 'insfg', 'flam1', 
+                'stocn', 'scity', 'stscd', 'hcefg', 'csmcu', 'csmam', 
+                'flg_3dsmk', 'card_transaction_count', 'customer_total_transactions', 
+                'card_transaction_ratio_before_30', 'card_transaction_ratio_after_30', 
+                'ratio_change', 'min_daily_trans', 'max_daily_trans', 'daily_transactions', 
+                'normalized_trans_freq', 'normalized_daily_amount', 'difference_seconds', 
+                'avg_interval', 'std_interval', 'transactions_per_mcc', 'mcc_total_amount', 
+                'variance_transaction_amount_per_mcc', 'mad_transaction_amount_per_mcc', 
+                'transactions_per_mchno', 'mchno_total_amount', 'variance_transaction_amount_per_mchno', 
+                'mad_transaction_amount_per_mchno', 'hcefg_change', 'unusual_3dsmk', 'city_change', 
+                'country_change', 'hour', 'loctm_seconds']
 
 feature_importances = catboost_model.feature_importances_
 
@@ -159,19 +149,19 @@ print(feature_importance_df)
 
 # # 預測和輸出資料
 
-# In[28]:
+# In[ ]:
 
 
 new_val_data = new_val_data.set_index('txkey')
 
 
-# In[30]:
+# In[ ]:
 
 
 columns_to_drop = ['chid', 'cano', 'bnsfg', 'flbmk', 'ovrlt', 'iterm']
 
 cat_features = ['contp', 'etymd', 'mcc', 'ecfg', 'stocn', 'scity', 'insfg', 'mchno', 'acqic',
-                'stscd', 'hcefg', 'csmcu', 'flg_3dsmk', 'hour','city_change', 'country_change']
+                'stscd', 'hcefg', 'csmcu', 'flg_3dsmk', 'hour','city_change', 'country_change', 'unusual_3dsmk']
 
 X = new_val_data.drop(columns=columns_to_drop)
 
@@ -181,29 +171,13 @@ for feature in cat_features:
 test_pool = Pool(X, cat_features=cat_features)
 
 
-# In[35]:
-
-
 y_pred = catboost_model.predict(test_pool).astype(int)
 new_val_data['pred']= y_pred
 new_val_data =new_val_data.reset_index()
 
 output_df = new_val_data[['txkey', 'pred']].set_index('txkey')
-example = example.drop_duplicates(subset='txkey')
 
 df2_sorted = example[['txkey']].merge(output_df, on='txkey', how='left')
-df2_sorted = df2_sorted.set_index('txkey')
-
-
-# In[36]:
-
-
 output_filename = 'dataset_2nd/predictions_secondround.csv'
+
 df2_sorted.to_csv(output_filename, index='True')
-
-
-# In[ ]:
-
-
-
-
