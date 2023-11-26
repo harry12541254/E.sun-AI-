@@ -1,4 +1,5 @@
 本次實作是以google colab的環境為主，因此撰寫主要為.ipynb檔案，為避免轉成.py檔案有影響，仍然附上notebook檔案提供審查。
+而model.cbm是將訓練好的模型儲存 在main.ipynb可直接執行用來預測
 
 ## 模型設定說明
 本模型主要採用了 CatBoost 進行訓練，相關參數設置以及概念如下：
