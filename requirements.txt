@@ -7,4 +7,4 @@ Matplotlib Version: 3.7.2
 Dask Version: 2023.11.0
 Scikit-Learn Version: 1.3.0
 CatBoost Version: 1.2.2
-SciPy Version: 1.11.2
+SciPy Version: 1.11.3
