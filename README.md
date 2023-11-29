@@ -7,11 +7,13 @@
 以利在新樣本進入時能有更多判斷依據。
 
 2. model：
-本次模型因為有較多的類別變數，因此在模型選擇上採用了CatBoost(https://catboost.ai/en/docs/)
+本次資料因為有較多的類別變數，因此在模型選擇上採用了CatBoost(https://catboost.ai/en/docs/)
 的提升梯度算法模型，並且在區分訓練和驗證資料時，採分層抽樣以利模型能夠平衡詐欺資料。Boosting演算法在處理非線型模型有非常優秀的表現，
 且Catboost更是針對類別變數有良好的處理方法，搭配上強大的運算效能，讓Catboost能有不錯的預測結果。
 
 最後main.py則是合併前述兩者檔案，匯入model資料夾內訓練好的model.cbm和 preprocess資料夾特徵工程後的val_data，
 執行後即可匯出預測檔案
+
+記憶體運算：32g
 
 註：因原始為使用google colab進行運算，雖有轉檔成.py，但為避免錯誤仍提供.ipynb檔案提供審查。
