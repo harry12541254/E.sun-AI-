@@ -13,7 +13,3 @@
 
 最後main.py則是合併前述兩者檔案，匯入model資料夾內訓練好的model.cbm和 preprocess資料夾特徵工程後的val_data，
 執行後即可匯出預測檔案
-
-記憶體運算：32g
-
-註：因原始為使用google colab進行運算，雖有轉檔成.py，但為避免錯誤仍提供.ipynb檔案提供審查。
