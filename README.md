@@ -2,14 +2,23 @@
 
 本次信用卡詐欺偵測專案在資料上主要分成兩部分處理，分別為
 
-1. Preprocess：
-將原有資料表的欄位特徵，透過組合新增出八項新欄位，針對信用卡的靜態以及動態資料進行整理，例如卡號的刷卡頻率、交易金額或是交易模式改變等，
-以利在新樣本進入時能有更多判斷依據。
+Overview
+This project focuses on detecting credit card fraud. The data is processed in two main steps:
 
-2. model：
-本次資料因為有較多的類別變數，因此在模型選擇上採用了CatBoost(https://catboost.ai/en/docs/)
-的提升梯度算法模型，並且在區分訓練和驗證資料時，採分層抽樣以利模型能夠平衡詐欺資料。Boosting演算法在處理非線型模型有非常優秀的表現，
-且Catboost更是針對類別變數有良好的處理方法，搭配上強大的運算效能，讓Catboost能有不錯的預測結果。
+Preprocessing: Features are engineered to create additional attributes based on both static and dynamic credit card transaction data, such as transaction frequency and patterns.
+Modeling: The model uses CatBoost, a gradient boosting algorithm, to handle categorical data and imbalance, providing superior performance in fraud detection.
 
-最後main.py則是合併前述兩者檔案，匯入model資料夾內訓練好的model.cbm和 preprocess資料夾特徵工程後的val_data，
-執行後即可匯出預測檔案
+'''bash
+E.sun-AI-/
+├── Model/                 # Trained model files
+├── Preprocess/            # Data preprocessing scripts
+├── main.ipynb             # Main notebook for combining preprocessing and model
+├── requirements.txt       # Project dependencies
+└── README.md              # Project documentation
+'''
+
+Tech Stack
+CatBoost for classification
+Python for scripting and analysis
+Usage
+Run the main.ipynb to preprocess data, train the model, and generate predictions.
