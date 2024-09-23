@@ -1,8 +1,6 @@
 # E.sun-AI-
 
-本次信用卡詐欺偵測專案在資料上主要分成兩部分處理，分別為
-
-##Overview
+## Overview
 This project focuses on detecting credit card fraud. The data is processed in two main steps:
 
 Preprocessing: Features are engineered to create additional attributes based on both static and dynamic credit card transaction data, such as transaction frequency and patterns.
